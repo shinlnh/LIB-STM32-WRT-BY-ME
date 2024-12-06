@@ -8,7 +8,7 @@
 
 
 RCC_RegDef_t* pRCC = RCC;
-void GPIO_PeriClockControl(GPIO_RegDef_t*pGPIOx, uint8_t EN_DI)
+void __LNH_GPIO_PeriClockControl(GPIO_RegDef_t*pGPIOx, uint8_t EN_DI)
 {
 	if (EN_DI == EN)
 		{
@@ -597,48 +597,57 @@ void __LNH_GPIO_Init(GPIO_Config_t* pGPIOConfig_t)
 
 		    }
 	    }
-
-	    //Cấu hình ngắt cho từng chế độ
-	    switch(pGPIOConfig_t->EXTI_TRIGGER)
+	    if(pGPIOConfig_t->GPIO_MODE <=3)
 	    {
-
-	    		case EXTI_IT_FT: //Configure FTSR
-
-	    			pGPIOConfig_t->pEXTI->FTSR |=	(1 << GPIO_PIN_LH1);
-	    			pGPIOConfig_t->pEXTI->RTSR &=  ~(1 << GPIO_PIN_LH1);
-	    			break;
-
-	    		case EXTI_IT_RT: //Configure RTSR
-
-	    			pGPIOConfig_t->pEXTI->RTSR |=	(1 << GPIO_PIN_LH1);
-	    			pGPIOConfig_t->pEXTI->FTSR &=  ~(1 << GPIO_PIN_LH1);
-	    			break;
-
-	    		case EXTI_IT_RFT: //Configure RTSR
-
-	    			pGPIOConfig_t->pEXTI->RTSR |=	(1 << GPIO_PIN_LH1);
-	    			pGPIOConfig_t->pEXTI->FTSR |=   (1 << GPIO_PIN_LH1);
-	    			break;
-		    	default:
-		    		// Xử lí trường hợp không hợp lệ (nếu cần)
-		    		break;
+	    	uint8_t temp;
+	    	temp = (pGPIOConfig_t->GPIO_MODE) << (2*pGPIOConfig_t->GPIO_PIN);
+	    	pGPIOConfig_t->pGPIOx->MODER &= ~(0x3 << (pGPIOConfig_t->GPIO_PIN));
+	    	pGPIOConfig_t->pGPIOx->MODER |= temp;
 	    }
-	    //Cấu hình ngắt chọn chân
-	    uint8_t temp1 = (pGPIOConfig_t->GPIO_PIN)/4;
-	    uint8_t temp2 = (pGPIOConfig_t->GPIO_PIN)%4;
-	    uint8_t portcode = GPIO_BASEADDR_TO_CODE(pGPIOConfig_t->pGPIOx);
-	    SYSCFG_PCLK_EN();
-	    pGPIOConfig_t->pSYSCFG->EXTICR[temp1] = portcode << (temp2 *4);
+	    else
+	    {
+			//Cấu hình ngắt cho từng chế độ
+			switch(pGPIOConfig_t->EXTI_TRIGGER)
+			{
 
-		//Cấu hình cho phép ngắt
-		if (pGPIOConfig_t->EXTI_ENDI == EXTI_EN)
-		{
-			pGPIOConfig_t->pEXTI->IMR  |=  (1 << GPIO_PIN_LH1);
-		}
-		else
-		{
-			pGPIOConfig_t->pEXTI->IMR  &=  ~(1 << GPIO_PIN_LH1);
-		}
+					case EXTI_IT_FT: //Configure FTSR
+
+						pGPIOConfig_t->pEXTI->FTSR |=	(1 << GPIO_PIN_LH1);
+						pGPIOConfig_t->pEXTI->RTSR &=  ~(1 << GPIO_PIN_LH1);
+						break;
+
+					case EXTI_IT_RT: //Configure RTSR
+
+						pGPIOConfig_t->pEXTI->RTSR |=	(1 << GPIO_PIN_LH1);
+						pGPIOConfig_t->pEXTI->FTSR &=  ~(1 << GPIO_PIN_LH1);
+						break;
+
+					case EXTI_IT_RFT: //Configure RTSR
+
+						pGPIOConfig_t->pEXTI->RTSR |=	(1 << GPIO_PIN_LH1);
+						pGPIOConfig_t->pEXTI->FTSR |=   (1 << GPIO_PIN_LH1);
+						break;
+					default:
+						// Xử lí trường hợp không hợp lệ (nếu cần)
+						break;
+			}
+			//Cấu hình ngắt chọn chân
+			uint8_t temp1 = (pGPIOConfig_t->GPIO_PIN)/4;
+			uint8_t temp2 = (pGPIOConfig_t->GPIO_PIN)%4;
+			uint8_t portcode = GPIO_BASEADDR_TO_CODE(pGPIOConfig_t->pGPIOx);
+			SYSCFG_PCLK_EN();
+			pGPIOConfig_t->pSYSCFG->EXTICR[temp1] = portcode << (temp2 *4);
+
+			//Cấu hình cho phép ngắt
+			if (pGPIOConfig_t->EXTI_ENDI == EXTI_EN)
+			{
+				pGPIOConfig_t->pEXTI->IMR  |=  (1 << GPIO_PIN_LH1);
+			}
+			else
+			{
+				pGPIOConfig_t->pEXTI->IMR  &=  ~(1 << GPIO_PIN_LH1);
+			}
+	    }
 }
 
 
@@ -718,7 +727,7 @@ void __LNH_GPIO_TogglePin(GPIO_RegDef_t*pGPIOx,uint8_t GPIO_PIN_NUMBER)
 	pGPIOx->ODR ^= (1 << GPIO_PIN_NUMBER );
 }
 
-void GPIO_IRQ_ITConfig(uint8_t IRQNumber ,uint8_t EN_DI)
+void __LNH_GPIO_IRQ_ITConfig(uint8_t IRQNumber ,uint8_t EN_DI)
 {
 	if(EN_DI == EN)
 	{
@@ -746,14 +755,14 @@ void GPIO_IRQ_ITConfig(uint8_t IRQNumber ,uint8_t EN_DI)
 		}
 	}
 }
-void GPIO_IRQPriorityConfig(uint8_t IRQNumber,uint8_t IRQPriority)
+void __LNH_GPIO_IRQPriorityConfig(uint8_t IRQNumber,uint8_t IRQPriority)
 {
 	uint8_t iprx = IRQNumber/4;
 	uint8_t iprx_section = IRQNumber%4;
 	uint8_t shift_amount = (8*iprx_section) + ( 8 - NO_PR_BITS_IMPLEMENT);
 	*(NVIC_PR_BASE_ADDR+(iprx*4)) |= (IRQPriority << shift_amount );
 }
-void GPIO_IRQHanding(uint8_t GPIO_PIN_NUMBER)
+void __LNH_GPIO_IRQHanding(uint8_t GPIO_PIN_NUMBER)
 {
 	EXTI_RegDef_t* pEXTI = EXTI;
 	//Clear the EXTI bit PR to pending to waiting for I

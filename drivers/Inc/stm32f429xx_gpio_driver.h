@@ -38,6 +38,7 @@
 #define GPIO_MODE_OUT		1
 #define GPIO_MODE_ALT		2
 #define GPIO_MODE_ANL		3
+#define GPIO_MODE_IT		4
 
 
 
@@ -126,7 +127,7 @@ typedef struct
 
 /************************API FOR CONFIG HANDLE GPIO**************************************/
 //Peripheral Clock Setup
-void GPIO_PeriClockControl(GPIO_RegDef_t* pGPIOx, uint8_t EN_DI);
+void __LNH_GPIO_PeriClockControl(GPIO_RegDef_t* pGPIOx, uint8_t EN_DI);
 
 
 //Init And DeInit Peripheral
@@ -157,10 +158,10 @@ void __LNH_GPIO_WritePort(GPIO_RegDef_t*pGPIOx,uint16_t value);
 void __LNH_GPIO_TogglePin(GPIO_RegDef_t*pGPIOx,uint8_t GPIO_PIN_NUMBER);
 
 
-//IRP Configuration and ISR handing
-void GPIO_IRQ_ITConfig(uint8_t IRQNumber,uint8_t EN_DI);
-void GPIO_IRQPriorityConfig(uint8_t IRQNumber,uint8_t IRQPriority);
-void GPIO_IRQHanding(uint8_t GPIO_PIN_NUMBER);
+//IRQ Configuration and ISR handing
+void __LNH_GPIO_IRQ_ITConfig(uint8_t IRQNumber,uint8_t EN_DI);
+void __LNH_GPIO_IRQPriorityConfig(uint8_t IRQNumber,uint8_t IRQPriority);
+void __LNH_GPIO_IRQHanding(uint8_t GPIO_PIN_NUMBER);
 
 
 

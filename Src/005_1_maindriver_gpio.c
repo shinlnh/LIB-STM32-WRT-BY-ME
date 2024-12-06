@@ -21,14 +21,14 @@
 #include "stm32f429xx_gpio_driver.h"
 
 void delay(void);
-void LNH_SysCLK(GPIO_RegDef_t*pGPIOx, uint8_t EN_DI);
+void LNH_GPIOCLK(GPIO_RegDef_t*pGPIOx, uint8_t EN_DI);
 void LNH_GPIO_Init(void);
 int main(void)
 {
 
 
-	LNH_SysCLK(GPIOG,1);
-	LNH_SysCLK(GPIOA,1);
+	LNH_GPIOCLK(GPIOG,1);
+	LNH_GPIOCLK(GPIOA,1);
 
 
 	LNH_GPIO_Init();
@@ -41,15 +41,15 @@ int main(void)
 		{
 			delay();
 			__LNH_GPIO_TogglePin(GPIOG, GPIO_PIN_14);
-		}*/
-		//delay();
+		}
+		delay();*/
 	}
 }
 
 
 void LNH_SysCLK(GPIO_RegDef_t*pGPIOx, uint8_t EN_DI)
 {
-	GPIO_PeriClockControl(pGPIOx,EN_DI);
+	__LNH_GPIO_PeriClockControl(pGPIOx,EN_DI);
 }
 
 
@@ -93,6 +93,6 @@ void delay()
 }
 void EXTI0_IRQHandler(void)
 {
-	GPIO_IRQHanding(GPIO_PIN_0);
+	__LNH_GPIO_IRQHanding(GPIO_PIN_0);
 	__LNH_GPIO_TogglePin(GPIOG, GPIO_PIN_14);
 }

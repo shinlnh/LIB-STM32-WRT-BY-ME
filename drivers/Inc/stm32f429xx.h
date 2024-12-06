@@ -10,9 +10,10 @@
 
 
 #include "stdint.h"
+#include "stddef.h"
 
 #define __vo volatile
-
+#define __weak	__attribute__((weak))
 /*************************ADDRESS BASE FOR ALL IN STM32F429XX********************/
 
 //Base Address for ARM CORTEX MX Processor
@@ -287,6 +288,28 @@ GPIO_RegDef_t* pGPIOK = GPIOK;*/
  * Tạo như thế này sẽ tốn bộ nhớ và dài dòng.
  */
 
+/**************************STRUCT FOR SPI************************************************/
+
+typedef struct
+{
+	__vo uint32_t CR1;
+	__vo uint32_t CR2;
+	__vo uint32_t SR;
+	__vo uint32_t DR;
+	__vo uint32_t CRCPR;
+	__vo uint32_t RXCRCR;
+	__vo uint32_t TXCRCR;
+	__vo uint32_t I2SCFGR;
+	__vo uint32_t I2SPR;
+}SPI_RegDef_t;
+
+#define SPI1 					(SPI_RegDef_t*)SPI1_BASEADDR
+#define SPI2 					(SPI_RegDef_t*)SPI2_I2S2_BASEADDR
+#define SPI3					(SPI_RegDef_t*)SPI3_I2S3_BASEADDR
+#define SPI4					(SPI_RegDef_t*)SPI4_BASEADDR
+#define SPI5					(SPI_RegDef_t*)SPI5_BASEADDR
+#define SPI6					(SPI_RegDef_t*)SPI6_BASEADDR
+
 
 /*********************TURN ON/OFF RCC FOR PERIPHRALS THAT USUAL USE**********************/
 /*********************GPIO - I2C - SPI - USART - TIMER -  SYSCFG*************************/
@@ -427,6 +450,16 @@ GPIO_RegDef_t* pGPIOK = GPIOK;*/
 #define GPIOJ_REG_RESET()		do{(pRCC->RCC_AHB1RSTR |= (1<<9)); (pRCC->RCC_AHB1RSTR &= ~(1<<9));}while(0)
 #define GPIOK_REG_RESET()		do{(pRCC->RCC_AHB1RSTR |= (1<<10)); (pRCC->RCC_AHB1RSTR &= ~(1<<10));}while(0)
 
+
+
+//Reset SPIx Peripherals
+
+#define SPI1_REG_RESET()		do{(pRCC->RCC_APB2RSTR |= (1<<12)); (pRCC->RCC_APB2RSTR &= ~(1<<12));}while(0)
+#define SPI2_REG_RESET()		do{(pRCC->RCC_APB1RSTR |= (1<<14)); (pRCC->RCC_APB1RSTR &= ~(1<<14));}while(0)
+#define SPI3_REG_RESET()		do{(pRCC->RCC_APB1RSTR |= (1<<15)); (pRCC->RCC_APB1RSTR &= ~(1<<15));}while(0)
+#define SPI4_REG_RESET()		do{(pRCC->RCC_APB2RSTR |= (1<<13)); (pRCC->RCC_APB2RSTR &= ~(1<<13));}while(0)
+#define SPI5_REG_RESET()		do{(pRCC->RCC_APB2RSTR |= (1<<20)); (pRCC->RCC_APB2RSTR &= ~(1<<20));}while(0)
+#define SPI6_REG_RESET()		do{(pRCC->RCC_APB2RSTR |= (1<<21)); (pRCC->RCC_AHB1RSTR &= ~(1<<21));}while(0)
 //#define IRQ Number trong NVIC
 #define IRQ_NO_EXTI0 			6
 #define IRQ_NO_EXTI1			7
@@ -435,6 +468,14 @@ GPIO_RegDef_t* pGPIOK = GPIOK;*/
 #define IRQ_NO_EXTI4			10
 #define IRQ_NO_EXTI9_5			23
 #define IRQ_NO_EXTI15_10		40
+
+// define SPI Number in NVIC
+#define IRQ_NO_SPI1        35
+#define IRQ_NO_SPI2        36
+#define IRQ_NO_SPI3        51
+#define IRQ_NO_SPI4        52
+#define IRQ_NO_SPI5        53
+#define IRQ_NO_SPI6        54
 
 // Nghệ thuật do while để 1 define có thể làm được 2 việc
 //Define some marco boolean
@@ -445,7 +486,9 @@ GPIO_RegDef_t* pGPIOK = GPIOK;*/
 #define RST			0
 #define GPIO_PIN_SET	1
 #define GPIO_PIN_RESET	0
-
+#define FLAG_SET		1
+#define FLAG_RESET		0
+#define SPI_BUSY_FLAG 	(1<<7)
 //Chuyển GPIO port người dùng nhập sang mã :
 #define GPIO_BASEADDR_TO_CODE(x) 		   ((x == GPIOA)?0:\
 											(x == GPIOB)?1:\
@@ -457,4 +500,6 @@ GPIO_RegDef_t* pGPIOK = GPIOK;*/
 											(x == GPIOH)?7:\
 											(x == GPIOI)?8:\
 											(x == GPIOJ)?9:0)
+extern RCC_RegDef_t* pRCC;
+
 #endif /* INC_STM32F429XX_H_ */
